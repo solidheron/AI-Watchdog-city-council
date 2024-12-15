@@ -10,9 +10,18 @@ This program is designed to identify potential ethical violations in city counci
 
 ## Setup Instructions
 
-1. Clone this repository or download the script to your local machine.
+# Create a virtual environment
+python -m venv transcript_analyzer_env
 
-2. Install the required Python packages:
+# Activate the environment
+# On Windows
+transcript_analyzer_env\Scripts\activate
+# On macOS/Linux
+source transcript_analyzer_env/bin/activate
+
+# Then install the libraries
+pip install youtube-transcript-api pytube requests beautifulsoup4 openai tkinter
+
 
 3. Obtain an OpenAI API key:
 - Sign up for an account at [OpenAI](https://openai.com/)
