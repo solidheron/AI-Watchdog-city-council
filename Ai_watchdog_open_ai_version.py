@@ -39,7 +39,6 @@ def summarize_transcript(transcript_text):
 def analyze_content(transcript_text):
     """Use OpenAI API to analyze the given transcript text for legal and ethical violations."""
     prompt = (
-        "The following text is from a Destin, Florida City Council meeting. "
         "Please analyze the text and identify any legal or ethical violations. "
         "Report only the following:\n"
         "- Specific laws, regulations, or ethical standards violated.\n"
@@ -62,7 +61,6 @@ def generate_nextdoor_posts(transcript_text):
     based on the provided transcript text.
     """
     prompt = (
-        "The following text is from a Destin, Florida City Council meeting. "
         "Based on this content, create simple, dry, short posts for Nextdoor:\n\n"
         f"{transcript_text}\n\n"
         "Each post should:\n"
