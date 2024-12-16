@@ -30,6 +30,16 @@ This program uses AI to analyze city council meeting videos on YouTube, identify
    ```bash
    export OPENAI_API_KEY=your_api_key_here
    ```
+5. manditory libraries
+   ```bash
+   pip install pytube requests beautifulsoup4 openai
+   ```
+6. optional libraries
+   ```bash
+   pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
+   ```
+ 
+
 
 ### Usage
 
