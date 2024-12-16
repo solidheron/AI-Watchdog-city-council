@@ -6,37 +6,42 @@ from bs4 import BeautifulSoup
 from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled
 from datetime import datetime
 import tkinter as tk
-from tkinter import simpledialog
+from tkinter import ttk, simpledialog, messagebox
 import threading
 import time
 import subprocess
 
 # Set OpenAI API Key globally
-import openai
-openai.api_key = "your-api-key"  # Replace this with your actual OpenAI API key
+import openai = "Your_Token_here"  # Replace this with your actual OpenAI API key
 
-# Function to simulate the llama3.1 model (run locally using Ollama)
+def generate_response(prompt, selected_model, max_tokens=300, temperature=0.7):
+    if selected_model == "llama3.1":
+        return llama3_1_api(prompt, max_tokens, temperature)
+    elif selected_model == "gpt-4o-mini":
+        return openai_api(prompt, max_tokens, temperature)
+    else:
+        return "Error: Invalid model selected"
+
 def llama3_1_api(prompt, max_tokens=300, temperature=0.7):
-    """Run llama3.1 model using Ollama locally."""
     try:
-        # Prepare the command to call Ollama
-        command = [
-            "ollama", "run", "llama3.1", 
-            "--text", prompt, 
-            "--max-tokens", str(max_tokens),
-            "--temperature", str(temperature)
-        ]
-        # Execute the command and capture the output
-        result = subprocess.run(command, capture_output=True, text=True)
-        if result.returncode == 0:
-            return result.stdout.strip()  # Return the output from the model
+        log_with_timestamp("Calling llama3.1 model on local Ollama server.")
+        payload = {
+            "model": "llama3.1",
+            "prompt": prompt,
+            "stream": False
+        }
+        response = requests.post("http://localhost:11434/api/generate", json=payload)
+        if response.status_code == 200:
+            return response.json()["response"]
         else:
-            return f"Error: {result.stderr.strip()}"
+            log_with_timestamp(f"Ollama server error: {response.text}")
+            return f"Error: {response.text}"
+    except requests.exceptions.RequestException as e:
+        return f"Error connecting to Ollama server: {str(e)}"
     except Exception as e:
         return f"Error running llama3.1 model: {str(e)}"
 
 def format_time(seconds):
-    """Convert seconds to SRT time format (HH:MM:SS,mmm)."""
     hours = int(seconds / 3600)
     minutes = int((seconds % 3600) / 60)
     seconds = seconds % 60
@@ -44,11 +49,9 @@ def format_time(seconds):
     return f"{hours:02d}:{minutes:02d}:{int(seconds):02d},{milliseconds:03d}"
 
 def log_with_timestamp(message):
-    """Log messages with a timestamp."""
     print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {message}")
 
 def summarize_transcript(transcript_text, model):
-    """Summarize the transcript using the chosen model."""
     prompt = (
         "The following text is from a Destin, Florida City Council meeting. "
         "Please summarize the text into comprehensive bullet points:\n\n"
@@ -57,7 +60,9 @@ def summarize_transcript(transcript_text, model):
     )
     try:
         log_with_timestamp(f"Summarizing transcript using model: {model}")
-        if model == "gpt-4o-mini":
+        if model == "llama3.1":
+            return llama3_1_api(prompt, max_tokens=300, temperature=0.7)
+        elif model == "gpt-4o-mini":
             response = openai.ChatCompletion.create(
                 model="gpt-4o-mini",
                 messages=[{"role": "user", "content": prompt}],
@@ -65,13 +70,12 @@ def summarize_transcript(transcript_text, model):
                 temperature=0.7,
             )
             return response['choices'][0]['message']['content'].strip()
-        elif model == "llama3.1":
-            return llama3_1_api(prompt, max_tokens=300, temperature=0.7)
+        else:
+            return f"Error summarizing transcript: Unsupported model {model}."
     except Exception as e:
         return f"Error summarizing transcript: {str(e)}"
 
 def analyze_content(transcript_text, model):
-    """Analyze the transcript for legal and ethical violations using the chosen model."""
     prompt = (
         "The following text is from a Destin, Florida City Council meeting. "
         "Please analyze the text and identify any legal or ethical violations. "
@@ -84,7 +88,9 @@ def analyze_content(transcript_text, model):
     )
     try:
         log_with_timestamp(f"Analyzing content for legal/ethical violations using model: {model}")
-        if model == "gpt-4o-mini":
+        if model == "llama3.1":
+            return llama3_1_api(prompt, max_tokens=500, temperature=0.7)
+        elif model == "gpt-4o-mini":
             response = openai.ChatCompletion.create(
                 model="gpt-4o-mini",
                 messages=[{"role": "user", "content": prompt}],
@@ -92,13 +98,12 @@ def analyze_content(transcript_text, model):
                 temperature=0.7,
             )
             return response['choices'][0]['message']['content'].strip()
-        elif model == "llama3.1":
-            return llama3_1_api(prompt, max_tokens=500, temperature=0.7)
+        else:
+            return f"Error analyzing content: Unsupported model {model}."
     except Exception as e:
         return f"Error analyzing content: {str(e)}"
 
 def generate_nextdoor_posts(transcript_text, model):
-    """Generate Nextdoor posts based on the transcript using the chosen model."""
     prompt = (
         "The following text is from a Destin, Florida City Council meeting. "
         "Based on this content, create simple, dry, short posts for Nextdoor:\n\n"
@@ -117,7 +122,9 @@ def generate_nextdoor_posts(transcript_text, model):
     )
     try:
         log_with_timestamp(f"Generating Nextdoor posts using model: {model}")
-        if model == "gpt-4o-mini":
+        if model == "llama3.1":
+            return llama3_1_api(prompt, max_tokens=150, temperature=0.5)
+        elif model == "gpt-4o-mini":
             response = openai.ChatCompletion.create(
                 model="gpt-4o-mini",
                 messages=[{"role": "user", "content": prompt}],
@@ -125,79 +132,99 @@ def generate_nextdoor_posts(transcript_text, model):
                 temperature=0.5,
             )
             return response['choices'][0]['message']['content'].strip()
-        elif model == "llama3.1":
-            return llama3_1_api(prompt, max_tokens=150, temperature=0.5)
+        else:
+            return f"Error generating Nextdoor posts: Unsupported model {model}."
     except Exception as e:
         return f"Error generating Nextdoor posts: {str(e)}"
 
 def split_into_two_chunks(text):
-    """Split text into two approximately equal chunks."""
     words = text.split()
     mid_index = len(words) // 2
     chunk1 = ' '.join(words[:mid_index])
     chunk2 = ' '.join(words[mid_index:])
     return chunk1, chunk2
 
-def fetch_youtube_data():
-    """Fetch YouTube video data and process transcript with error handling."""
+def view_json_file(json_filename):
+    try:
+        with open(json_filename, 'r', encoding='utf-8') as file:
+            json_content = file.read()
+        viewer = tk.Tk()
+        viewer.title(f"Viewing: {os.path.basename(json_filename)}")
+        text_widget = tk.Text(viewer, wrap=tk.WORD)
+        text_widget.insert(tk.END, json_content)
+        text_widget.config(state=tk.DISABLED)
+        text_widget.pack(expand=1, fill=tk.BOTH)
+        scrollbar = tk.Scrollbar(viewer, command=text_widget.yview)
+        text_widget.config(yscrollcommand=scrollbar.set)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        viewer.geometry("800x600")
+        viewer.mainloop()
+    except Exception as e:
+        log_with_timestamp(f"Error displaying JSON file: {str(e)}")
+
+class YouTubeTranscriptGUI:
+    def __init__(self, master):
+        self.master = master
+        master.title("YouTube Transcript Processor")
+        master.geometry("400x300")
+
+        self.label = tk.Label(master, text="Enter YouTube URL:")
+        self.label.pack(pady=10)
+
+        self.url_entry = tk.Entry(master, width=50)
+        self.url_entry.pack(pady=5)
+
+        self.model_label = tk.Label(master, text="Select AI Model:")
+        self.model_label.pack(pady=10)
+
+        self.model_buttons_frame = tk.Frame(master)
+        self.model_buttons_frame.pack(pady=5)
+
+        self.models = ["llama3.1", "gpt-4o-mini"]
+        self.selected_model = tk.StringVar()
+
+        for model in self.models:
+            button = ttk.Button(self.model_buttons_frame, text=model, command=lambda m=model: self.select_model(m))
+            button.pack(side=tk.LEFT, padx=5)
+
+        self.process_button = ttk.Button(master, text="Process Transcript", command=self.process_transcript)
+        self.process_button.pack(pady=20)
+
+    def select_model(self, model):
+        self.selected_model.set(model)
+        messagebox.showinfo("Model Selected", f"You selected {model}")
+
+    def process_transcript(self):
+        url = self.url_entry.get()
+        model = self.selected_model.get()
+        if not url:
+            messagebox.showerror("Error", "Please enter a YouTube URL")
+            return
+        if not model:
+            messagebox.showerror("Error", "Please select an AI model")
+            return
+        result = fetch_youtube_data(url, model)
+        messagebox.showinfo("Processing Complete", result)
+
+def fetch_youtube_data(video_url, model):
     try:
         log_with_timestamp("Starting the YouTube video data fetch process.")
-        # Create a Tkinter pop-up dialog for the YouTube URL
-        root = tk.Tk()
-        root.withdraw()  # Hide the root window
-
-        video_url = simpledialog.askstring("Input", "Enter the YouTube video URL:")
-        if not video_url:
-            raise ValueError("No URL provided. Exiting.")
-        
         log_with_timestamp(f"YouTube URL entered: {video_url}")
-
-        # Pop-up for model selection using radio buttons with descriptions
-        model_selection = tk.Tk()
-        model_selection.title("Choose Model")
-        model_var = tk.StringVar(value="gpt-4o-mini")  # Default selection
-
-        tk.Label(model_selection, text="Choose the model to use:").pack()
-        tk.Radiobutton(
-            model_selection, 
-            text="OpenAI gpt-4o-mini (Requires API Token)", 
-            variable=model_var, 
-            value="gpt-4o-mini"
-        ).pack(anchor=tk.W)
-        tk.Radiobutton(
-            model_selection, 
-            text="Llama3.1 (Best Offline Model)", 
-            variable=model_var, 
-            value="llama3.1"
-        ).pack(anchor=tk.W)
-
-        def confirm_selection():
-            model_selection.quit()  # Close the model selection window
-
-        tk.Button(model_selection, text="Confirm", command=confirm_selection).pack()
-        model_selection.mainloop()  # Start the GUI loop
-
-        # Now that model selection is confirmed, log the selected model
-        model = model_var.get()
         log_with_timestamp(f"Model selected: {model}")
-        
+
         video_id = re.search(r"(?:v=|\/)([a-zA-Z0-9_-]{11})(?:[&?]|$)", video_url).group(1)
         response = requests.get(f"https://www.youtube.com/watch?v={video_id}")
         soup = BeautifulSoup(response.text, 'html.parser')
-
         upload_date_meta = soup.find('meta', {'itemprop': 'uploadDate'})
         formatted_date = datetime.fromisoformat(upload_date_meta['content']).strftime("%Y-%m-%d") if upload_date_meta else "Unknown_Date"
         video_title = soup.find('title').text.replace("- YouTube", "").strip() if soup.find('title') else "Unknown Title"
-
         log_with_timestamp(f"Video title: {video_title}, Upload date: {formatted_date}")
 
         transcript = YouTubeTranscriptApi.get_transcript(video_id)
         transcript_text = " ".join(entry['text'] for entry in transcript)
         chunk1, chunk2 = split_into_two_chunks(transcript_text)
-
         log_with_timestamp("Splitting transcript into two chunks.")
 
-        # Use multithreading to process each chunk in parallel
         def process_chunk(chunk, chunk_num):
             summary = summarize_transcript(chunk, model)
             legal_analysis = analyze_content(chunk, model)
@@ -219,7 +246,6 @@ def fetch_youtube_data():
         for thread in threads:
             thread.join()
 
-        # Prepare JSON data
         json_data = {
             "video_title": video_title,
             "upload_date": formatted_date,
@@ -235,7 +261,9 @@ def fetch_youtube_data():
             json.dump(json_data, json_file, ensure_ascii=False, indent=4)
 
         log_with_timestamp(f"Data processed successfully. JSON saved to {json_filename}.")
+        view_json_file(json_filename)
         return f"Data processed successfully using {model}. JSON saved to {json_filename}."
+
     except TranscriptsDisabled:
         return "Transcripts are disabled for this video."
     except ValueError as e:
@@ -243,6 +271,7 @@ def fetch_youtube_data():
     except Exception as e:
         return f"An error occurred: {str(e)}"
 
-# Run the script
-result = fetch_youtube_data()
-print(result)
+if __name__ == "__main__":
+    root = tk.Tk()
+    gui = YouTubeTranscriptGUI(root)
+    root.mainloop()
