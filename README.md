@@ -1,63 +1,73 @@
-# AI Watchdog
+## AI Watchdog for City Council Meetings
 
-This program is designed to identify potential ethical violations in city council meetings uploaded to YouTube. It works by fetching the video transcript, analyzing the content using OpenAI's GPT model, and generating a report on possible legal or ethical issues. The script prompts users for a YouTube video URL, processes the transcript, and produces a summary along with an analysis of any concerning content. This automated approach helps citizens and watchdogs efficiently review council meetings for transparency and accountability. The program's output includes detailed descriptions of potential violations, specific laws or ethical standards that may have been breached, and any content that raises legal or ethical concerns15. By automating this process, the tool aims to make it easier for the public to monitor local government activities and ensure compliance with ethical standards6.
+This program uses AI to analyze city council meeting videos on YouTube, identifying potential ethical violations and legal issues.
 
-
-## Prerequisites
+### Prerequisites
 
 - Python 3.7 or higher
 - pip (Python package installer)
 
-## Setup Instructions
+### Installation
 
-# Create a virtual environment
-python -m venv transcript_analyzer_env
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/solidheron/AI-Watchdog-city-council.git
+   cd AI-Watchdog-city-council
+   ```
 
-# Activate the environment
-# On Windows
-transcript_analyzer_env\Scripts\activate
-# On macOS/Linux
-source transcript_analyzer_env/bin/activate
+2. Set up a virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+   ```
 
-# Then install the libraries
-pip install youtube-transcript-api pytube requests beautifulsoup4 openai tkinter
+3. Install required libraries:
+   ```bash
+   pip install youtube-transcript-api pytube requests beautifulsoup4 openai
+   ```
 
+4. Obtain an OpenAI API key from [OpenAI](https://openai.com/) and set it as an environment variable:
+   ```bash
+   export OPENAI_API_KEY=your_api_key_here
+   ```
 
-3. Obtain an OpenAI API key:
-- Sign up for an account at [OpenAI](https://openai.com/)
-- Navigate to the API section and create a new API key
-- Copy the API key
-
-4. Open the script in a text editor and replace the placeholder in this line with your actual OpenAI API key:
-
-5. (Optional) If you want to use a different OpenAI model, modify the `model` parameter in the `openai.ChatCompletion.create()` calls.
-
-## Usage
+### Usage
 
 1. Run the script:
+   ```bash
+   python main.py
+   ```
 
-2. When prompted, enter the URL of the YouTube video you want to analyze.
+2. Enter the YouTube URL of the city council meeting when prompted.
 
-3. The script will process the video and generate a JSON file in the `processed_transcriptions` folder. The filename will include the upload date and video title.
+3. The analysis will be saved as a JSON file in the `processed_transcriptions` folder.
 
-## Output
+### License
 
-The script generates a JSON file containing:
-- Video title and upload date
-- Full transcript text
-- Summary of the transcript (in two parts)
-- Analysis of potential legal and ethical issues (in two parts)
-- Generated Nextdoor-style posts (in two parts)
+This project is licensed under the MIT License:
 
-## Customization
+```
+MIT License
 
-You can modify the prompts in the `summarize_transcript()`, `analyze_content()`, and `generate_nextdoor_posts()` functions to adapt the script for different types of videos or analyses.
+Copyright (c) [year] [fullname]
 
-## Troubleshooting
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-- If you encounter a "Transcripts are disabled for this video" error, the video owner has not made transcripts available.
-- For other errors, check your API key and internet connection, and ensure you have the latest versions of the required packages.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-## Disclaimer
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
 
-This script is for educational and informational purposes only. Always respect YouTube's terms of service and content creators' rights when using this tool.
+This license allows users to use, modify, and distribute the software, including for commercial purposes, as long as they include the original copyright and license notice
